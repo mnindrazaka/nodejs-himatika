@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>Edit Kontak</h1>
+    <form method="post" action="/process-edit?index={{ index }}">
+      <input
+        type="text"
+        name="name"
+        placeholder="masukkan nama kontak"
+        value="{{contact.name}}"
+      />
+      <input
+        type="text"
+        name="email"
+        placeholder="masukkan email"
+        value="{{ contact.email }}"
+      />
+      <button type="submit">Simpan</button>
+    </form>
+  </body>
+</html>

@@ -9,11 +9,15 @@
   <body>
     <h1>Data Kontak</h1>
 
-    <a href="/create" class="add-contact">Tambah kontak</a>
+    <a href="/create">Tambah kontak</a>
 
     <ol>
       {{#each contacts}}
-      <li>{{ name }} - {{ email }}</li>
+      <li>
+        <span>{{ name }} - {{ email }}</span>
+        <a href="/edit?index={{ @index }}">Edit</a>
+        <a href="/process-delete?index={{ @index }}">Delete</a>
+      </li>
       {{/each}}
     </ol>
   </body>
