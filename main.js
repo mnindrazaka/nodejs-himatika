@@ -1,7 +1,29 @@
 const express = require("express");
 const Handlebars = require("handlebars");
 const fs = require("fs");
+
+// 1. import mysql
+const mysql = require("mysql");
+
 const app = express();
+
+// 2. membuat koneksi
+const db = mysql.createConnection({
+  host: "localhost",
+  port: 3306,
+  database: "contact",
+  user: "root",
+  password: "((root))",
+});
+
+// 3. melakukan koneksi
+db.connect(function (err) {
+  if (err == null) {
+    console.log("db connection success");
+  } else {
+    console.log("db connection failed ", err);
+  }
+});
 
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: false }));
@@ -13,17 +35,25 @@ const contacts = [
 ];
 
 app.get("/", function (req, res) {
-  // ambil html string
+  // ambil html string (gak berubah)
   const html = fs.readFileSync("./public/html/index.html").toString();
 
-  // buat template
+  // buat template (gak berubah)
   const template = Handlebars.compile(html);
 
-  // masukkan data ke template
-  const result = template({ contacts: contacts });
+  // ambil data dari database
+  db.query("SELECT * FROM users", function (err, result) {
+    if (err) {
+      console.log("query error ", err);
+      throw err;
+    } else {
+      // masukkan data ke template
+      const resultHtml = template({ contacts: result });
 
-  // kirim hasilnya
-  res.send(result);
+      // tampilkan ke browser
+      res.send(resultHtml);
+    }
+  });
 });
 
 app.get("/create", function (req, res) {
@@ -35,19 +65,38 @@ app.post("/process-create", function (req, res) {
   const name = req.body.name;
   const email = req.body.email;
 
-  // tambahkan ke contact
+  // tambahkan ke contact (butuh diubah!!!!!!)
   contacts.push({ name: name, email: email });
 
-  // pindahkan user ke /
-  res.redirect("/");
+  db.query(
+    `INSERT INTO users SET name="${name}", email="${email}"`,
+    // "INSERT INTO users SET name=" + name + ", email=" + email,
+    function (err, result) {
+      if (err) {
+        console.log("query error ", err);
+        throw err;
+      } else {
+        // pindahkan user ke /
+        res.redirect("/");
+      }
+    }
+  );
 });
 
 app.get("/process-delete", function (req, res) {
-  const index = Number(req.query.index);
+  // ambil id
+  const id = Number(req.query.id);
 
-  contacts.splice(index, 1);
-
-  res.redirect("/");
+  // hapus db berdasarkan id
+  db.query(`DELETE FROM users WHERE id=${id}`, function (err, result) {
+    if (err) {
+      console.log("query error ", err);
+      throw err;
+    } else {
+      // pindahkan user ke /
+      res.redirect("/");
+    }
+  });
 });
 
 app.get("/edit", function (req, res) {
